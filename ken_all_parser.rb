@@ -52,7 +52,7 @@ old_city = ""
 old_town = ""
 
 CSV.foreach("KEN_ALL.CSV", encoding: "Shift_JIS:UTF-8") do |row|
-   next if row[8] == "以下に記載がない場合"
+   next if row[8] == "以下に掲載がない場合"
    next if row[9] == "1"
 
    todofuken_kana = NKF.nkf("-Xw", row[3])
