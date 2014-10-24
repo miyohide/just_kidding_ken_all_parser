@@ -20,7 +20,7 @@ end
 
 todofuken = Todofuken.order(:id)
 city = City.order(:id)
-town = Town.order(:id)
+town = Town.where("id % 100 = 0").order(:id)
 
 File.open("addresses.yml", "w") { |f|
    f.write("addresses:\n")
@@ -34,7 +34,9 @@ File.open("addresses.yml", "w") { |f|
    end
    f.write("  town:\n")
    town.each do |record|
-      f.write("    - ['#{record.town_kanji}', '#{record.town_hira}', '#{record.town_kana}']\n")
+      if record.town_kanji != '以下に掲載がない場合'
+         f.write("    - ['#{record.town_kanji}', '#{record.town_hira}', '#{record.town_kana}']\n")
+      end
    end
 }
 
