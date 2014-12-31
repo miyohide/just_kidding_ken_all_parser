@@ -16,6 +16,7 @@ class InitialSchema < ActiveRecord::Migration
       t.string :todofuken_kanji
       t.string :todofuken_kana
       t.string :todofuken_hira
+      t.integer :todofuken_number
       t.timestamps
     end
 
@@ -23,6 +24,8 @@ class InitialSchema < ActiveRecord::Migration
       t.string :city_kanji
       t.string :city_kana
       t.string :city_hira
+      t.integer :todofuken_number
+      t.integer :city_number
       t.timestamps
     end
 
@@ -30,6 +33,8 @@ class InitialSchema < ActiveRecord::Migration
       t.string :town_kanji
       t.string :town_kana
       t.string :town_hira
+      t.integer :todofuken_number
+      t.integer :city_number
       t.timestamps
     end
   end
@@ -47,6 +52,8 @@ class Town < ActiveRecord::Base
 end
 
 i = 0
+todofuken_number = 0
+city_number = 0
 old_todofuken = ""
 old_city = ""
 old_town = ""
@@ -70,6 +77,7 @@ CSV.foreach("KEN_ALL.CSV", encoding: "Shift_JIS:UTF-8") do |row|
   # 14 :  変更理由
   next if row[8] == "以下に掲載がない場合"
   next if row[9] == "1"
+  next if row[5] =~ /\d/
 
   todofuken_kana = NKF.nkf("-Xw", row[3])
   todofuken_hira = NKF.nkf("--hiragana -w", row[3])
@@ -87,25 +95,32 @@ CSV.foreach("KEN_ALL.CSV", encoding: "Shift_JIS:UTF-8") do |row|
   town_kanji = row[8].gsub(/（.+/, "")
 
   if old_todofuken != row[6]
+    todofuken_number += 1
     Todofuken.create!(
       todofuken_kanji: row[6],
       todofuken_kana:  todofuken_kana,
-      todofuken_hira:  todofuken_hira)
+      todofuken_hira:  todofuken_hira,
+      todofuken_number: todofuken_number)
     old_todofuken = row[6]
   end
 
   if old_city != row[7]
+    city_number += 1
     City.create!(
       city_kanji:  row[7],
       city_kana:   city_kana,
-      city_hira:   city_hira)
+      city_hira:   city_hira,
+      todofuken_number: todofuken_number,
+      city_number: city_number)
     old_city = row[7]
   end
 
   Town.create!(
     town_kanji:  town_kanji,
     town_kana:   town_kana,
-    town_hira:   town_hira)
+    town_hira:   town_hira,
+    todofuken_number: todofuken_number,
+    city_number: city_number)
 
   i += 1
   puts "#{i - 1}件保存しました。" if i % 1000 == 0
